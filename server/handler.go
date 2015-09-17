@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/inhies/go-newznab"
+	"github.com/inhies/newznab"
 )
 
 // Handles all API requests. Should be registered to /api as per convention.

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/inhies/go-newznab"
+	"github.com/inhies/newznab"
 )
 
 // Returned list of NZBs from the Indexer.
