@@ -230,6 +230,8 @@ func (a *Attributes) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 	return nil
 
 }
+
+/*
 func (i *Indexer) BookSearch(req *BookQuery) (*BookResults, error) {
 	return nil, nil
 }
@@ -239,6 +241,7 @@ type BookQuery struct {
 	Title  string
 	Author string
 }
+*/
 
 type BookResults struct {
 	// Total number of results found.
@@ -254,6 +257,7 @@ type BookResults struct {
 	Error *Error
 }
 
+/*
 func (i *Indexer) MusicSearch(req *MusicQuery) (*MusicResults, error) {
 	return nil, nil
 }
@@ -267,6 +271,7 @@ type MusicQuery struct {
 	Year   int
 	Genre  string
 }
+*/
 
 type MusicResults struct {
 	// Total number of results found.
@@ -282,6 +287,7 @@ type MusicResults struct {
 	Error *Error
 }
 
+/*
 func (i *Indexer) MovieSearch(req *MovieQuery) (*MovieResults, error) {
 	return nil, nil
 }
@@ -291,6 +297,7 @@ type MovieQuery struct {
 	Genre  string
 	IMDBID int
 }
+*/
 
 type MovieResults struct {
 	// Total number of results found.
@@ -306,6 +313,7 @@ type MovieResults struct {
 	Error *Error
 }
 
+/*
 func (i *Indexer) TvSearch(req *TvQuery) (*TvResults, error) {
 	return nil, nil
 }
@@ -317,6 +325,7 @@ type TvQuery struct {
 	Episode  string
 }
 
+*/
 type TvResults struct {
 	// Total number of results found.
 	Total int
@@ -374,10 +383,12 @@ type SearchQuery struct {
 
 	// The 0 based query offset defining which part of the response we want.
 	Offset int
+
+	indexer *Indexer
 }
 
 // Perform a newznab SEARCH request on the specified Indexer.
-func (i *Indexer) Search(req *SearchQuery) (*SearchResults, error) {
+func (i *Indexer) search(req *SearchQuery) (*SearchResults, error) {
 	// URL encode the search string.
 	v := url.Values{}
 	v.Add("t", "search")

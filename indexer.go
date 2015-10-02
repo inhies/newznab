@@ -25,6 +25,16 @@ type Indexer struct {
 	SkipSSLVerification bool
 }
 
+func (s *SearchQuery) BookSearch(title, author string) (*BookResults, error) { return nil, nil }
+func (s *SearchQuery) MusicSearch(artist, album, label, track, genre string, year int) (*MusicResults, error) {
+	return nil, nil
+}
+func (s *SearchQuery) MovieSearch(genre string, IMDB int) (*MovieResults, error) { return nil, nil }
+func (s *SearchQuery) TvSearch(season, episode string, TVRageID int) (*TvResults, error) {
+	return nil, nil
+}
+func (s *SearchQuery) Search() (*SearchResults, error) { return nil, nil }
+func (i *Indexer) NewQuery(query string) *SearchQuery  { return nil }
 func New(url string, apikey string) (*Indexer, error) {
 	i := &Indexer{
 		APIKey: apikey,
