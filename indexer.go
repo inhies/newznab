@@ -1,6 +1,6 @@
 package newznab
 
-// TODO: CAPS,REGISTER,TV-SEARCH,MOVIE-SEARCH,MUSIC-SEARCH,BOOK-SEARCH,DETAILS
+// TODO:REGISTER,DETAILS
 // GETNFO,GET,CART-ADD,CART-DEL,COMMENTS,COMMENTS-ADD,USER
 func (i *Indexer) Caps() (*Capabilities, error) {
 	return nil, nil
@@ -23,6 +23,14 @@ type Indexer struct {
 	// Skip SSL certification verification. Some website use self signed
 	// certificates and need this set to true.
 	SkipSSLVerification bool
+}
+
+func New(url string, apikey string) (*Indexer, error) {
+	i := &Indexer{
+		APIKey: apikey,
+		URL:    url,
+	}
+	return i, nil
 }
 
 // REGISTER
