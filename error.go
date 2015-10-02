@@ -42,7 +42,10 @@ func (e *Error) AsXML() ([]byte, error) {
 }
 
 func (e *Error) String() string {
-	return e.Description
+	if e != nil {
+		return e.Description
+	}
+	return ""
 }
 
 // Check to see if the API data unmarshals to a valid Error struct. Even if we

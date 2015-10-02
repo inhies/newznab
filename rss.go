@@ -34,21 +34,5 @@ type SearchResponse struct {
 
 		// All NZBs that match the search query, up to the response limit.
 		NZBs []NZB `xml:"item"`
-		/*
-			// Extra RSS fields that we dont need to worry about yet.
-			Copyright   string
-			Editor      string `xml:"managingEditor"`
-			LastBuilt   Time
-			Generator   string
-			Docs        string
-			Cloud       string
-			TTL         int
-			SkipHours   struct {
-				Hours []int `xml:"hour"`
-			}
-			SkipDays struct {
-				Days []string `xml:"day"`
-			}
-		*/
 	} `xml:"channel"`
 }
