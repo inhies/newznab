@@ -50,26 +50,7 @@ type NZB struct {
 		Type   string `xml:"type,attr"`
 	} `xml:"enclosure",omitempty`
 
-	//Attributes Attrs `xml:"attr"`
-	Attributes AXX `xml:"attr"`
-}
-type AXX struct {
-	Newznab Attributes //Newznab attributes per the spec
-
-	// Other attributes added by third parties, accessed via:
-	// [namespace][attribute name][attribute value]
-	Other map[string]map[string]string
-}
-
-type TvNZB struct {
-	NZB
-	Attributes struct {
-		Newznab TvAttributes `xml:"attr"` //Newznab attributes per the spec
-
-		// Other attributes added by third parties, accessed via:
-		// [namespace][attribute name][attribute value]
-		Other map[string]map[string]string
-	} `xml:"attr"`
+	Attributes Attributes `xml:"attr"`
 }
 
 type attrs struct {
@@ -78,16 +59,16 @@ type attrs struct {
 	Value   string `xml:"value,attr"`
 }
 
-func (a *AXX) addUnknownAttr(attr *attrs) {
-	if a.Other == nil {
-		a.Other = make(map[string]map[string]string)
+func (a *Attributes) addUnknownAttr(attr *attrs) {
+	if a.Unknown == nil {
+		a.Unknown = make(map[string]map[string]string)
 	}
-	if a.Other[attr.XMLName.Space] == nil {
-		a.Other[attr.XMLName.Space] = make(map[string]string)
+	if a.Unknown[attr.XMLName.Space] == nil {
+		a.Unknown[attr.XMLName.Space] = make(map[string]string)
 	}
-	a.Other[attr.XMLName.Space][attr.Name] = attr.Value
+	a.Unknown[attr.XMLName.Space][attr.Name] = attr.Value
 }
-func (a *AXX) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+func (a *Attributes) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var raw attrs
 
 	err := d.DecodeElement(&raw, &start)
@@ -103,7 +84,7 @@ func (a *AXX) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 			if err != nil {
 				return err
 			}
-			a.Newznab.Size = b
+			a.Size = b
 			//a.Newznab.Info = &url.URL{}
 			/*
 				case "category":
@@ -249,6 +230,106 @@ func (a *AXX) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	return nil
 
 }
+func (i *Indexer) BookSearch(req *BookQuery) (*BookResults, error) {
+	return nil, nil
+}
+
+type BookQuery struct {
+	SearchQuery
+	Title  string
+	Author string
+}
+
+type BookResults struct {
+	// Total number of results found.
+	Total int
+
+	// How far in to all the found results we are.
+	Offset int
+
+	// NZBs matching the search query.
+	NZBs []BookNZB
+
+	// If the request returned an error this will be set.
+	Error *Error
+}
+
+func (i *Indexer) MusicSearch(req *MusicQuery) (*MusicResults, error) {
+	return nil, nil
+}
+
+type MusicQuery struct {
+	SearchQuery
+	Album  string
+	Artist string
+	Label  string
+	Track  string
+	Year   int
+	Genre  string
+}
+
+type MusicResults struct {
+	// Total number of results found.
+	Total int
+
+	// How far in to all the found results we are.
+	Offset int
+
+	// NZBs matching the search query.
+	NZBs []MusicNZB
+
+	// If the request returned an error this will be set.
+	Error *Error
+}
+
+func (i *Indexer) MovieSearch(req *MovieQuery) (*MovieResults, error) {
+	return nil, nil
+}
+
+type MovieQuery struct {
+	SearchQuery
+	Genre  string
+	IMDBID int
+}
+
+type MovieResults struct {
+	// Total number of results found.
+	Total int
+
+	// How far in to all the found results we are.
+	Offset int
+
+	// NZBs matching the search query.
+	NZBs []MovieNZB
+
+	// If the request returned an error this will be set.
+	Error *Error
+}
+
+func (i *Indexer) TvSearch(req *TvQuery) (*TvResults, error) {
+	return nil, nil
+}
+
+type TvQuery struct {
+	SearchQuery
+	TVRageID int
+	Season   string
+	Episode  string
+}
+
+type TvResults struct {
+	// Total number of results found.
+	Total int
+
+	// How far in to all the found results we are.
+	Offset int
+
+	// NZBs matching the search query.
+	NZBs []TvNZB
+
+	// If the request returned an error this will be set.
+	Error *Error
+}
 
 // Returned list of NZBs from the Indexer.
 type SearchResults struct {
@@ -266,7 +347,7 @@ type SearchResults struct {
 }
 
 // A newznab SEARCH request. Only the Query field is required.
-type SearchRequest struct {
+type SearchQuery struct {
 	// The search query.
 	Query string
 
@@ -296,7 +377,7 @@ type SearchRequest struct {
 }
 
 // Perform a newznab SEARCH request on the specified Indexer.
-func (i *Indexer) Search(req *SearchRequest) (*SearchResults, error) {
+func (i *Indexer) Search(req *SearchQuery) (*SearchResults, error) {
 	// URL encode the search string.
 	v := url.Values{}
 	v.Add("t", "search")
