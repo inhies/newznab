@@ -1,10 +1,14 @@
 package newznab
 
+import "net/http"
+
 // TODO:REGISTER,DETAILS
 // GETNFO,GET,CART-ADD,CART-DEL,COMMENTS,COMMENTS-ADD,USER
+/*
 func (i *Indexer) Caps() (*Capabilities, error) {
 	return nil, nil
 }
+*/
 
 // Indexer specific information.
 type Indexer struct {
@@ -23,24 +27,42 @@ type Indexer struct {
 	// Skip SSL certification verification. Some website use self signed
 	// certificates and need this set to true.
 	SkipSSLVerification bool
+
+	client *http.Client
 }
 
-func (s *SearchQuery) BookSearch(title, author string) (*BookResults, error) { return nil, nil }
-func (s *SearchQuery) MusicSearch(artist, album, label, track, genre string, year int) (*MusicResults, error) {
+/*
+// Searches the Indexer's television categories and allows you to specifiy
+// the exact season and episode you want, as well as the TvRage ID number for
+// the show.
+func (i *Indexer) TvSearch(query *Query, season, episode string, TVRageID int) (*TvResults, error) {
 	return nil, nil
 }
-func (s *SearchQuery) MovieSearch(genre string, IMDB int) (*MovieResults, error) { return nil, nil }
-func (s *SearchQuery) TvSearch(season, episode string, TVRageID int) (*TvResults, error) {
+func (i *Indexer) BookSearch(query *Query, title, author string) (*BookResults, error) {
 	return nil, nil
 }
-func (s *SearchQuery) Search() (*SearchResults, error) { return nil, nil }
-func (i *Indexer) NewQuery(query string) *SearchQuery  { return nil }
-func New(url string, apikey string) (*Indexer, error) {
-	i := &Indexer{
+func (i *Indexer) MusicSearch(query *Query, artist, album, label, track, genre string, year int) (*MusicResults, error) {
+	return nil, nil
+}
+func (i *Indexer) MovieSearch(query *Query, genre string, IMDB int) (*MovieResults, error) {
+	return nil, nil
+}
+*/
+
+// NewQuery returns a new Query given a query string.
+func NewQuery(query string) *Query {
+	return &Query{Query: query}
+}
+
+// NewIndexer returns a new Indexer given a URL and API key.
+func NewIndexer(url string, apikey string) *Indexer {
+	return &Indexer{
 		APIKey: apikey,
 		URL:    url,
+		client: &http.Client{
+			Transport: http.DefaultTransport,
+		},
 	}
-	return i, nil
 }
 
 // REGISTER

@@ -3,7 +3,6 @@ package newznab
 import (
 	"crypto/tls"
 	"encoding/xml"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -16,7 +15,7 @@ import (
 
 var Pretty = &pretty.Config{PrintStringers: true}
 
-// Item represents a single NZB item in search results.
+// NZB represents a single NZB item in search results.
 type NZB struct {
 	Title    string `xml:"title",omitempty`
 	Link     string `xml:"link",omitempty`
@@ -53,23 +52,28 @@ type NZB struct {
 	Attributes Attributes `xml:"attr"`
 }
 
-type attrs struct {
+type Attribute struct {
 	XMLName xml.Name
 	Name    string `xml:"name,attr"`
 	Value   string `xml:"value,attr"`
 }
 
-func (a *Attributes) addUnknownAttr(attr *attrs) {
+/*
+func (a *Attributes) addUnknownAttr(attr *Attribute) {
 	if a.Unknown == nil {
-		a.Unknown = make(map[string]map[string]string)
+		a.Unknown = make(map[string]*Attribute)
 	}
 	if a.Unknown[attr.XMLName.Space] == nil {
-		a.Unknown[attr.XMLName.Space] = make(map[string]string)
+		a.Unknown[attr.XMLName.Space] = &Attribute{}
 	}
-	a.Unknown[attr.XMLName.Space][attr.Name] = attr.Value
+	a.Unknown[attr.XMLName.Space] = &Attribute{
+		Name:  attr.Name,
+		Value: attr.Value,
+	}
 }
+*/
 func (a *Attributes) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	var raw attrs
+	var raw Attribute
 
 	err := d.DecodeElement(&raw, &start)
 	if err != nil {
@@ -101,32 +105,36 @@ func (a *Attributes) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 						return err
 					}
 					a.Newznab.Files = i
-				case "poster":
-					a.Newznab.Poster = raw.Value
+			*/
+		case "poster":
+			a.Poster = raw.Value
+			/*
 				case "group":
 					a.Newznab.Group = raw.Value
 				case "team":
 					a.Newznab.Team = raw.Value
-				case "grabs":
-					i, err := strconv.Atoi(raw.Value)
-					if err != nil {
-						return err
-					}
-					a.Newznab.Grabs = i
-				case "password":
-				case "comments":
-					i, err := strconv.Atoi(raw.Value)
-					if err != nil {
-						return err
-					}
-					a.Newznab.Comments = i
-				case "usenetdate":
-				case "info":
-					u, err := url.Parse(raw.Value)
-					if err != nil {
-						return err
-					}
-					a.Newznab.Info = u
+			*/
+		case "grabs":
+			i, err := strconv.Atoi(raw.Value)
+			if err != nil {
+				return err
+			}
+			a.Grabs = i
+		case "password":
+		case "comments":
+			i, err := strconv.Atoi(raw.Value)
+			if err != nil {
+				return err
+			}
+			a.Comments = i
+		case "usenetdate":
+		case "info":
+			u, err := url.Parse(raw.Value)
+			if err != nil {
+				return err
+			}
+			a.Info = u
+			/*
 				case "year":
 
 				// Start of TV specific items
@@ -224,120 +232,11 @@ func (a *Attributes) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error 
 		default:
 		}
 	} else {
-		a.addUnknownAttr(&raw)
+		//a.addUnknownAttr(&raw)
 	}
 	//*t = Time{date}
 	return nil
 
-}
-
-/*
-func (i *Indexer) BookSearch(req *BookQuery) (*BookResults, error) {
-	return nil, nil
-}
-
-type BookQuery struct {
-	SearchQuery
-	Title  string
-	Author string
-}
-*/
-
-type BookResults struct {
-	// Total number of results found.
-	Total int
-
-	// How far in to all the found results we are.
-	Offset int
-
-	// NZBs matching the search query.
-	NZBs []BookNZB
-
-	// If the request returned an error this will be set.
-	Error *Error
-}
-
-/*
-func (i *Indexer) MusicSearch(req *MusicQuery) (*MusicResults, error) {
-	return nil, nil
-}
-
-type MusicQuery struct {
-	SearchQuery
-	Album  string
-	Artist string
-	Label  string
-	Track  string
-	Year   int
-	Genre  string
-}
-*/
-
-type MusicResults struct {
-	// Total number of results found.
-	Total int
-
-	// How far in to all the found results we are.
-	Offset int
-
-	// NZBs matching the search query.
-	NZBs []MusicNZB
-
-	// If the request returned an error this will be set.
-	Error *Error
-}
-
-/*
-func (i *Indexer) MovieSearch(req *MovieQuery) (*MovieResults, error) {
-	return nil, nil
-}
-
-type MovieQuery struct {
-	SearchQuery
-	Genre  string
-	IMDBID int
-}
-*/
-
-type MovieResults struct {
-	// Total number of results found.
-	Total int
-
-	// How far in to all the found results we are.
-	Offset int
-
-	// NZBs matching the search query.
-	NZBs []MovieNZB
-
-	// If the request returned an error this will be set.
-	Error *Error
-}
-
-/*
-func (i *Indexer) TvSearch(req *TvQuery) (*TvResults, error) {
-	return nil, nil
-}
-
-type TvQuery struct {
-	SearchQuery
-	TVRageID int
-	Season   string
-	Episode  string
-}
-
-*/
-type TvResults struct {
-	// Total number of results found.
-	Total int
-
-	// How far in to all the found results we are.
-	Offset int
-
-	// NZBs matching the search query.
-	NZBs []TvNZB
-
-	// If the request returned an error this will be set.
-	Error *Error
 }
 
 // Returned list of NZBs from the Indexer.
@@ -356,9 +255,12 @@ type SearchResults struct {
 }
 
 // A newznab SEARCH request. Only the Query field is required.
-type SearchQuery struct {
+type Query struct {
 	// The search query.
 	Query string
+
+	// search, tvsearch, etc
+	SearchType string
 
 	// Limit search to these newsgroups.
 	Groups []string
@@ -384,17 +286,89 @@ type SearchQuery struct {
 	// The 0 based query offset defining which part of the response we want.
 	Offset int
 
-	indexer *Indexer
+	// After a Query has been executed, Feed will be set to the returned
+	// RSS feed data.
+	Feed *RSS
+
+	Params map[string]string
 }
 
-// Perform a newznab SEARCH request on the specified Indexer.
-func (i *Indexer) search(req *SearchQuery) (*SearchResults, error) {
+// Default search query parameters.
+var DefaultQuery = &Query{
+	SearchType: "search",
+	Limit:      100,
+	Extended:   true,
+}
+
+func NewQueryFromURL(URL string) (*Query, error) {
+	q := DefaultQuery
+	parsed, err := url.Parse(URL)
+	if err != nil {
+		return nil, err
+	}
+
+	values := parsed.Query()
+	for k, v := range values {
+		switch k {
+		case "t":
+			q.SearchType = strings.Join(v, ",")
+		case "q":
+			q.Query = strings.Join(v, ",")
+		case "group":
+			q.Groups = v
+		case "limit":
+			q.Limit, err = strconv.Atoi(v[len(v)-1])
+			if err != nil {
+				return nil, err
+			}
+		case "cat":
+			//q.Query = strings.Join(v, ",")
+		case "o":
+			//q.Query = strings.Join(v, ",")
+		case "attrs":
+			q.Attributes = v
+		case "extended":
+			for _, x := range v {
+				if x == "1" {
+					q.Extended = true
+				}
+			}
+		case "del":
+			for _, x := range v {
+				if x == "1" {
+					q.Delete = true
+				}
+			}
+		case "maxage":
+			//q.Query = strings.Join(v, ",")
+		case "offset":
+			q.Offset, err = strconv.Atoi(v[len(v)-1])
+			if err != nil {
+				return nil, err
+			}
+		case "apikey":
+			continue
+		default:
+			if q.Params == nil {
+				q.Params = make(map[string]string)
+			}
+			q.Params[k] = strings.Join(v, ",")
+		}
+	}
+	return q, nil
+}
+
+// GetQueryURL returns the complete API request URL that the Indexer would
+// request when performing a search.
+func (i *Indexer) GetQueryURL(req *Query) (*url.URL, error) {
 	// URL encode the search string.
 	v := url.Values{}
-	v.Add("t", "search")
+	v.Add("t", req.SearchType)
 	v.Set("apikey", i.APIKey)
-	v.Add("o", "xml") // XML by default please, becase JSON doesn't exist!
-	v.Add("q", req.Query)
+	v.Add("o", "xml")
+	if req.Query != "" {
+		v.Add("q", req.Query)
+	}
 
 	if len(req.Groups) > 0 {
 		v.Add("group", strings.Join(req.Groups, ","))
@@ -408,9 +382,9 @@ func (i *Indexer) search(req *SearchQuery) (*SearchResults, error) {
 	if len(req.Categories) > 0 {
 		var str []string
 		for _, value := range req.Categories {
-			str = append(str, string(int(value)))
+			str = append(str, strconv.Itoa(value))
 		}
-		v.Add("cat", strings.Join(str, ","))
+		v.Set("cat", strings.Join(str, ","))
 	}
 
 	if req.Extended {
@@ -440,7 +414,21 @@ func (i *Indexer) search(req *SearchQuery) (*SearchResults, error) {
 		return nil, err
 	}
 
+	for k, p := range req.Params {
+		v.Add(k, p)
+	}
 	finalURL.RawQuery = v.Encode()
+	return finalURL, nil
+}
+
+// Execute a search in all categories. Most times this will be the best option
+// if you don't need to include extra filtering of the results. For example,
+// when searching for a Tv show but you don't care about the season or episode.
+func (i *Indexer) Search(req *Query) (*SearchResults, error) {
+	finalURL, err := i.GetQueryURL(req)
+	if err != nil {
+		return nil, err
+	}
 
 	data, apiErr, httpErr := i.query(finalURL)
 	if httpErr != nil {
@@ -450,13 +438,16 @@ func (i *Indexer) search(req *SearchQuery) (*SearchResults, error) {
 	r := new(SearchResults)
 	if apiErr != nil {
 		r.Error = apiErr
-		return nil, nil
+		return r, nil
 	}
 
 	// No error found, unmarsal the returned RSS feed
-	var feed SearchResponse
+	var feed = new(RSS)
+	//feed.Channel = SearchResults{}
+
 	err = xml.Unmarshal(data, &feed)
 	if err != nil {
+		pretty.Print(string(data))
 		return nil, err
 	}
 	/*
@@ -470,18 +461,31 @@ func (i *Indexer) search(req *SearchQuery) (*SearchResults, error) {
 	r.NZBs = feed.Channel.NZBs
 	r.Total = feed.Channel.Response.Total
 	r.Offset = feed.Channel.Response.Offset
+
+	if len(r.NZBs) == 0 || r.Total == 0 {
+		//return nil, nil
+	}
+	req.Feed = feed
 	return r, nil
 }
 
 // figure out a way to do errors better
 func (i *Indexer) query(url *url.URL) ([]byte, *Error, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: i.SkipSSLVerification},
+	if i.client == nil {
+		i.client = &http.Client{
+			Transport: http.DefaultTransport,
+		}
 	}
 
-	client := &http.Client{Transport: tr}
-	fmt.Println("GET", url.String(), "\n")
-	res, err := client.Get(url.String())
+	if i.client.Transport == nil {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: i.SkipSSLVerification},
+		}
+
+		//client := &http.Client{Transport: tr}
+		i.client.Transport = tr
+	}
+	res, err := i.client.Get(url.String())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -495,11 +499,10 @@ func (i *Indexer) query(url *url.URL) ([]byte, *Error, error) {
 	}
 
 	// Check for an error condition.
-	apiErr, httpErr := CheckForError(data)
+	apiErr, httpErr := checkForError(data)
 	if apiErr != nil || httpErr != nil {
 		return nil, apiErr, httpErr
 	}
 
-	//fmt.Printf("%s\n", data)
 	return data, nil, nil
 }

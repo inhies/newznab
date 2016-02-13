@@ -3,8 +3,10 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/inhies/newznab"
+	"github.com/kr/pretty"
 )
 
 // Handles all API requests. Should be registered to /api as per convention.
@@ -32,7 +34,10 @@ func APIhandler(w http.ResponseWriter, r *http.Request) {
 	}
 	return
 }
-
+func searchHandler(w http.ResponseWriter, r *http.Request, q url.Values) {
+	pretty.Print(q)
+	return
+}
 func sendError(w http.ResponseWriter, e newznab.Error) {
 	output, err := e.AsXML()
 	if err != nil {

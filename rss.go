@@ -1,17 +1,17 @@
 package newznab
 
 // Search requests are responded to with an RSS feed.
-type SearchResponse struct {
+type RSS struct {
 	// RSS version of the response.
 	Version string `xml:"version,attr"`
 	Channel struct {
-		Title string `xml:"title"`
+		Title string `xml:"title,omitempty"`
 		Link  struct {
 			Href string `xml:"href,attr"`
 			Rel  string `xml:"rel,attr"`
 			Type string `xml:"type,attr"`
-		} `xml:"http://www.w3.org/2005/Atom link"`
-		Description string `xml:"description"`
+		} `xml:"http://www.w3.org/2005/Atom link,omitempty"`
+		Description string `xml:"description,omitempty"`
 		Language    string `xml:"language,omitempty"`
 		Webmaster   string `xml:"webmaster,omitempty"`
 		Category    string `xml:"category,omitempty"`
@@ -22,7 +22,7 @@ type SearchResponse struct {
 			Description string `xml:"description,omitempty"`
 			Width       int    `xml:"width,omitempty"`
 			Height      int    `xml:"height,omitempty"`
-		} `xml:"image"`
+		} `xml:"image,omitempty"`
 
 		// Newznab specific attribute that lists the total number of
 		// results found and the zero based offset of the results that
@@ -34,5 +34,21 @@ type SearchResponse struct {
 
 		// All NZBs that match the search query, up to the response limit.
 		NZBs []NZB `xml:"item"`
+		/*
+			// Extra RSS fields that we dont need to worry about yet.
+			Copyright   string
+			Editor      string `xml:"managingEditor"`
+			LastBuilt   Time
+			Generator   string
+			Docs        string
+			Cloud       string
+			TTL         int
+			SkipHours   struct {
+				Hours []int `xml:"hour"`
+			}
+			SkipDays struct {
+				Days []string `xml:"day"`
+			}
+		*/
 	} `xml:"channel"`
 }

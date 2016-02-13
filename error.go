@@ -27,8 +27,8 @@ var (
 	ErrAPIDisabled  = NewError(910, "API Disabled")
 )
 
-func NewError(code int, description string) Error {
-	return Error{Code: code, Description: description}
+func NewError(code int, description string) *Error {
+	return &Error{Code: code, Description: description}
 
 }
 
@@ -50,7 +50,7 @@ func (e *Error) String() string {
 
 // Check to see if the API data unmarshals to a valid Error struct. Even if we
 // request a JSON response, an error will be an XML response.
-func CheckForError(data []byte) (*Error, error) {
+func checkForError(data []byte) (*Error, error) {
 	var e Error
 	err := xml.Unmarshal(data, &e)
 	if err != nil {
