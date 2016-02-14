@@ -1,3 +1,4 @@
+// Newznab provides easy access to compliant newznab usenet indexer APIs.
 package newznab
 
 import "net/http"
